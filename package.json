@@ -1,0 +1,49 @@
+{
+  "name": "samantha-ui",
+  "private": false,
+  "version": "1.0.0",
+  "description": "Audio-reactive 3D visualization built with React 19, TypeScript, and Three.js. Liquid glass aesthetics with real-time WebGL shaders.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/desertcache/samantha-ui.git"
+  },
+  "license": "MIT",
+  "author": "Samuel Bates",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
+    "@react-three/postprocessing": "^3.0.4",
+    "autoprefixer": "^10.4.23",
+    "clsx": "^2.1.1",
+    "maath": "^0.10.8",
+    "postcss": "^8.5.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "simplex-noise": "^4.0.3",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^3.4.17",
+    "three": "^0.182.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.182.0",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4",
+    "vite-plugin-glsl": "^1.5.5"
+  }
+}
