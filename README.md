@@ -1,6 +1,7 @@
 # Samantha UI
 
 Audio-reactive 3D visualization built with **React 19**, **TypeScript**, and **Three.js**. A liquid glass orb that responds to voice input in real time, powered by custom WebGL shaders.
+https://www.youtube.com/watch?v=_4_-0YiA5H0
 
 ![React](https://img.shields.io/badge/React_19-61DAFB?style=flat&logo=react&logoColor=black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
