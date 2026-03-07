@@ -4,5 +4,6 @@ import glsl from 'vite-plugin-glsl'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/samantha-ui/',
   plugins: [react(), glsl()],
 })
