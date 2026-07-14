@@ -5,6 +5,10 @@ import { Void } from './components/Environment/Void'
 import { Overlay } from './components/Overlay/Overlay'
 import { useAIState } from './hooks/useAIState'
 
+// Embed mode (?embed=1): orb only — no text overlay, no backend connection
+// attempts. Used by portfolio embeds (e.g. the hero orb on desertcache.github.io).
+const EMBED = new URLSearchParams(window.location.search).has('embed')
+
 export default function App() {
   const {
     state,
@@ -13,7 +17,7 @@ export default function App() {
     partialTranscript,
     subtitleChunk,
     subtitleDuration
-  } = useAIState()
+  } = useAIState(EMBED)
 
   return (
     <>
@@ -34,14 +38,16 @@ export default function App() {
         </EffectComposer>
       </Canvas>
 
-      <Overlay
-        state={state}
-        transcript={transcript}
-        partialTranscript={partialTranscript}
-        subtitleChunk={subtitleChunk}
-        subtitleDuration={subtitleDuration}
-        amplitudeRef={amplitudeRef}
-      />
+      {!EMBED && (
+        <Overlay
+          state={state}
+          transcript={transcript}
+          partialTranscript={partialTranscript}
+          subtitleChunk={subtitleChunk}
+          subtitleDuration={subtitleDuration}
+          amplitudeRef={amplitudeRef}
+        />
+      )}
     </>
   )
 }

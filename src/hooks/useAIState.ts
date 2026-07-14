@@ -93,7 +93,7 @@ function sleep(ms: number) {
 }
 
 
-export function useAIState(): UseAIStateReturn {
+export function useAIState(skipBackend: boolean = false): UseAIStateReturn {
     const [state, setState] = useState<AIState>('LISTENING')
     const [transcript, setTranscript] = useState<string>('')
     const [partialTranscript, setPartialTranscript] = useState<string>('')
@@ -153,8 +153,14 @@ export function useAIState(): UseAIStateReturn {
         }
     }, [state])
 
-    // WebSocket connection — falls back to demo mode after 2 failed attempts
+    // WebSocket connection — falls back to demo mode after 2 failed attempts.
+    // skipBackend (embed mode) goes straight to demo mode: no connection
+    // attempts, no console noise inside host pages.
     useEffect(() => {
+        if (skipBackend) {
+            setDemoMode(true)
+            return
+        }
         let isConnecting = false
 
         const connect = () => {
