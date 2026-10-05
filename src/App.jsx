@@ -7,7 +7,11 @@ import { useAIState } from './hooks/useAIState'
 
 // Embed mode (?embed=1): orb only — no text overlay, no backend connection
 // attempts. Used by portfolio embeds (e.g. the hero orb on desertcache.github.io).
-const EMBED = new URLSearchParams(window.location.search).has('embed')
+// Controlled mode (?embed=1&control=1): no demo cycle either; the host page sets
+// the state by postMessage (see useAIState). Used by the portfolio's ask bar.
+const params = new URLSearchParams(window.location.search)
+const EMBED = params.has('embed')
+const CONTROLLED = EMBED && params.has('control')
 
 export default function App() {
   const {
@@ -17,7 +21,7 @@ export default function App() {
     partialTranscript,
     subtitleChunk,
     subtitleDuration
-  } = useAIState(EMBED)
+  } = useAIState(EMBED, CONTROLLED)
 
   return (
     <>

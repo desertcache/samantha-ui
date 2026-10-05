@@ -32,6 +32,7 @@ const DEMO_PHRASES = [
  * when no WebSocket backend is available.
  */
 function useDemoMode(
+    enabled: boolean,
     setState: (s: AIState) => void,
     amplitudeRef: React.MutableRefObject<number>,
     setSubtitleChunk: (s: string) => void,
@@ -39,6 +40,7 @@ function useDemoMode(
     setPartialTranscript: (s: string) => void,
 ) {
     useEffect(() => {
+        if (!enabled) return
         console.log('[Demo] Starting demo mode — no backend required')
         let phraseIndex = 0
         let cancelled = false
@@ -85,15 +87,68 @@ function useDemoMode(
             cancelled = true
             if (amplitudeInterval) clearInterval(amplitudeInterval)
         }
-    }, [setState, amplitudeRef, setSubtitleChunk, setSubtitleDuration, setPartialTranscript])
+    }, [enabled, setState, amplitudeRef, setSubtitleChunk, setSubtitleDuration, setPartialTranscript])
 }
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+/**
+ * Host pages allowed to drive a controlled embed: Sam's GitHub Pages site, plus
+ * localhost for development.
+ */
+function isAllowedHost(origin: string): boolean {
+    return origin === 'https://desertcache.github.io' ||
+        /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+}
 
-export function useAIState(skipBackend: boolean = false): UseAIStateReturn {
+/**
+ * Controlled mode: the host page sets the state with
+ *   iframe.contentWindow.postMessage({ type: 'orb:state', state: 'THINKING' }, '*')
+ * and the orb answers { type: 'orb:ready' } once it is listening. While SPEAKING,
+ * the amplitude is simulated the same way the demo does it, since a host page
+ * has no voice to measure.
+ */
+function useControlledMode(
+    enabled: boolean,
+    setState: (s: AIState) => void,
+    amplitudeRef: React.MutableRefObject<number>,
+) {
+    useEffect(() => {
+        if (!enabled) return
+        let amplitudeInterval: ReturnType<typeof setInterval> | null = null
+        const stopSpeaking = () => {
+            if (amplitudeInterval) clearInterval(amplitudeInterval)
+            amplitudeInterval = null
+            amplitudeRef.current = 0
+        }
+
+        const onMessage = (event: MessageEvent) => {
+            if (!isAllowedHost(event.origin)) return
+            const data = event.data
+            if (!data || data.type !== 'orb:state') return
+            if (data.state !== 'LISTENING' && data.state !== 'THINKING' && data.state !== 'SPEAKING') return
+            stopSpeaking()
+            setState(data.state)
+            if (data.state === 'SPEAKING') {
+                amplitudeInterval = setInterval(() => {
+                    amplitudeRef.current = 0.3 + Math.random() * 0.5
+                }, 50)
+            }
+        }
+
+        window.addEventListener('message', onMessage)
+        window.parent?.postMessage({ type: 'orb:ready' }, '*')
+        return () => {
+            window.removeEventListener('message', onMessage)
+            stopSpeaking()
+        }
+    }, [enabled, setState, amplitudeRef])
+}
+
+
+export function useAIState(skipBackend: boolean = false, controlled: boolean = false): UseAIStateReturn {
     const [state, setState] = useState<AIState>('LISTENING')
     const [transcript, setTranscript] = useState<string>('')
     const [partialTranscript, setPartialTranscript] = useState<string>('')
@@ -158,7 +213,8 @@ export function useAIState(skipBackend: boolean = false): UseAIStateReturn {
     // attempts, no console noise inside host pages.
     useEffect(() => {
         if (skipBackend) {
-            setDemoMode(true)
+            // A controlled embed takes its state from the host page, not the demo loop.
+            if (!controlled) setDemoMode(true)
             return
         }
         let isConnecting = false
@@ -250,13 +306,17 @@ export function useAIState(skipBackend: boolean = false): UseAIStateReturn {
         }
     }, [])
 
-    // Activate demo mode when backend is unavailable
+    useControlledMode(controlled, setState, smoothedAmplitudeRef)
+
+    // Activate demo mode when backend is unavailable. Off, the loop doesn't run at
+    // all (it used to run with fresh no-op setters, restarting on every render).
     useDemoMode(
-        demoMode ? setState : () => {},
+        demoMode,
+        setState,
         smoothedAmplitudeRef,
-        demoMode ? setSubtitleChunk : () => {},
-        demoMode ? setSubtitleDuration : () => {},
-        demoMode ? setPartialTranscript : () => {},
+        setSubtitleChunk,
+        setSubtitleDuration,
+        setPartialTranscript,
     )
 
     return {
