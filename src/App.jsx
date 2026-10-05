@@ -9,9 +9,20 @@ import { useAIState } from './hooks/useAIState'
 // attempts. Used by portfolio embeds (e.g. the hero orb on desertcache.github.io).
 // Controlled mode (?embed=1&control=1): no demo cycle either; the host page sets
 // the state by postMessage (see useAIState). Used by the portfolio's ask bar.
+// Transparent mode (?embed=1&transparent=1): the orb alone on a clear canvas, so the
+// host page shows through around its edge. No dark scene and no post-processing,
+// whose full-frame passes (noise, vignette, bloom) would paint an opaque square;
+// the host adds its own glow. Used by the portfolio's ask bar.
 const params = new URLSearchParams(window.location.search)
 const EMBED = params.has('embed')
 const CONTROLLED = EMBED && params.has('control')
+const TRANSPARENT = EMBED && params.has('transparent')
+
+if (TRANSPARENT) {
+  for (const el of [document.documentElement, document.body, document.getElementById('root')]) {
+    if (el) el.style.background = 'transparent'
+  }
+}
 
 export default function App() {
   const {
@@ -25,8 +36,8 @@ export default function App() {
 
   return (
     <>
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-        <Void />
+      <Canvas camera={{ position: [0, 0, 5], fov: 45 }} gl={TRANSPARENT ? { alpha: true } : undefined}>
+        {!TRANSPARENT && <Void />}
 
         <ambientLight intensity={0.5} />
         <pointLight position={[10, 10, 10]} intensity={1} />
@@ -34,12 +45,14 @@ export default function App() {
 
         <SoulOrb state={state} amplitudeRef={amplitudeRef} />
 
-        <EffectComposer disableNormalPass>
-          <Bloom luminanceThreshold={0.4} luminanceSmoothing={0.95} intensity={0.8} radius={0.8} />
-          <ChromaticAberration offset={[0.0005, 0.0005]} />
-          <Noise opacity={0.08} />
-          <Vignette eskil={false} offset={0.2} darkness={0.7} />
-        </EffectComposer>
+        {!TRANSPARENT && (
+          <EffectComposer disableNormalPass>
+            <Bloom luminanceThreshold={0.4} luminanceSmoothing={0.95} intensity={0.8} radius={0.8} />
+            <ChromaticAberration offset={[0.0005, 0.0005]} />
+            <Noise opacity={0.08} />
+            <Vignette eskil={false} offset={0.2} darkness={0.7} />
+          </EffectComposer>
+        )}
       </Canvas>
 
       {!EMBED && (
