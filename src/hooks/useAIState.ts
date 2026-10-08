@@ -209,8 +209,9 @@ export function useAIState(skipBackend: boolean = false, controlled: boolean = f
     }, [state])
 
     // WebSocket connection — falls back to demo mode after 2 failed attempts.
-    // skipBackend (embed mode) goes straight to demo mode: no connection
-    // attempts, no console noise inside host pages.
+    // skipBackend (embed mode, or a page not served from the machine running the
+    // backend, see App.jsx) goes straight to demo mode: no connection attempts,
+    // no console noise.
     useEffect(() => {
         if (skipBackend) {
             // A controlled embed takes its state from the host page, not the demo loop.

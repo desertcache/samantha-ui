@@ -18,6 +18,17 @@ const EMBED = params.has('embed')
 const CONTROLLED = EMBED && params.has('control')
 const TRANSPARENT = EMBED && params.has('transparent')
 
+// The voice backend (ws://localhost:8765, see useAIState) only exists on the machine
+// that runs it, so the page tries it only when it is itself served from there
+// (localhost, 127.0.0.1, [::1]). Anywhere else, such as the deployed page, it goes
+// straight to demo mode with no connection attempt: no red WebSocket errors in a
+// visitor's console, and no loopback permission prompt in current Chrome. ?backend=1
+// opts back in, so the owner can run the deployed page against a local backend.
+// Embeds never attempt it, whatever the host.
+const LOCAL_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+const SERVED_LOCALLY = LOCAL_HOSTS.includes(window.location.hostname)
+const SKIP_BACKEND = EMBED || !(SERVED_LOCALLY || params.get('backend') === '1')
+
 if (TRANSPARENT) {
   for (const el of [document.documentElement, document.body, document.getElementById('root')]) {
     if (el) el.style.background = 'transparent'
@@ -32,7 +43,7 @@ export default function App() {
     partialTranscript,
     subtitleChunk,
     subtitleDuration
-  } = useAIState(EMBED, CONTROLLED)
+  } = useAIState(SKIP_BACKEND, CONTROLLED)
 
   return (
     <>

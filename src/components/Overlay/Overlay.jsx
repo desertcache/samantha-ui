@@ -1,6 +1,7 @@
 import React from 'react'
 import { TranscriptText } from './TranscriptText'
 import { SubtitleText } from './SubtitleText'
+import { Credit } from './Credit'
 
 export function Overlay({ state, transcript, partialTranscript, subtitleChunk, subtitleDuration, amplitudeRef }) {
     return (
@@ -27,6 +28,9 @@ export function Overlay({ state, transcript, partialTranscript, subtitleChunk, s
                     isVisible={state === 'LISTENING'}
                 />
             </div>
+
+            {/* Credit + links, bottom-left corner (the overlay itself is standalone-only) */}
+            <Credit />
         </div>
     )
 }

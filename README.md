@@ -47,4 +47,4 @@ npm run preview  # preview the production build
 npm run lint     # ESLint
 ```
 
-The UI expects a WebSocket server at `ws://localhost:8765` broadcasting `{ state, amplitude, transcript, subtitleChunk, subtitleDuration, mode, ... }`. It runs without the backend (it will retry the connection and idle in the LISTENING state), but the audio-reactive behavior only comes alive when the assistant backend is streaming.
+The UI expects a WebSocket server at `ws://localhost:8765` broadcasting `{ state, amplitude, transcript, subtitleChunk, subtitleDuration, mode, ... }`. Served from localhost it tries that backend twice, then falls back to a demo cycle; on any other host, such as the deployed page, it goes straight to the demo with no connection attempt. Add `?backend=1` to try the backend from a deployed page. The audio-reactive behavior only comes alive when the assistant backend is streaming.
